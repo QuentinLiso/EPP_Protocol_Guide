@@ -28,7 +28,7 @@ Feel free to read the RFCs if you need more detailed explanations though, it's a
   - [3.1. XSD Sample Files](#31-xsd-sample-files)
       - [Step 1 :](#step-1-)
       - [Step 2 :](#step-2-)
-        - [Step 3 :](#step-3-)
+      - [Step 3 :](#step-3-)
       - [Step 4 :](#step-4-)
       - [Step 5 :](#step-5-)
   - [3.2 EPP sample messages](#32-epp-sample-messages)
@@ -325,7 +325,7 @@ Every EPP XML instance must begin with this element.
 
 This means that the whole EPP message will be enclosed in an **`<epp xmlns="urn:ietf:params:xml:ns:epp-1.0"></epp>`** tag
 
-###### Step 3 :
+##### Step 3 :
 
 We follow the cascade definition to epp:eppType :
 
