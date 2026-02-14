@@ -13,13 +13,10 @@ Through the presentation of the protocol's terms and syntax in this guide, you'l
 
 Feel free to read the RFCs if you need more detailed explanations though, it's a lot of fun !
 
----
 
 # Resources
 
 
-
----
 
 # Table of Contents
 
