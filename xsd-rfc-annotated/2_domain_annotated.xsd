@@ -1,0 +1,1015 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema targetNamespace="urn:ietf:params:xml:ns:domain-1.0"
+    xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"
+    xmlns:host="urn:ietf:params:xml:ns:host-1.0"
+    xmlns:epp="urn:ietf:params:xml:ns:epp-1.0"
+    xmlns:eppcom="urn:ietf:params:xml:ns:eppcom-1.0"
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified">
+
+    <!--
+   Import common element types.
+   -->
+    <import namespace="urn:ietf:params:xml:ns:eppcom-1.0"
+        schemaLocation="./0_eppcom_annotated.xsd" />
+    <import namespace="urn:ietf:params:xml:ns:epp-1.0"
+        schemaLocation="./1_epp_annotated.xsd" />
+    <import namespace="urn:ietf:params:xml:ns:host-1.0"
+        schemaLocation="./3_host_annotated.xsd" />
+
+    <annotation>
+        <documentation> Extensible Provisioning Protocol v1.0 domain provisioning schema. </documentation>
+    </annotation>
+
+    <!--
+   Child elements found in EPP commands.
+   -->
+    <element name="check" type="domain:mNameType">
+        <annotation>
+            <documentation>Determine if an object can be provisioned within a repository.</documentation>
+        </annotation>
+    </element>
+    <element name="create" type="domain:createType">
+        <annotation>
+            <documentation>Provides a transform operation that allows a client to create a domain
+                object</documentation>
+        </annotation>
+    </element>
+    <element name="delete" type="domain:sNameType">
+        <annotation>
+            <documentation>Provides a transform operation that allows a client to delete a domain
+                object. A domain object SHOULD NOT be deleted if subordinate host objects are
+                associated with the domain object. For example, if domain "example.com" exists and
+                host object "ns1.example.com" also exists, then domain "example.com" SHOULD NOT be
+                deleted until host "ns1.example.com" has either been deleted or renamed to exist in
+                a different superordinate domain. A server SHOULD notify clients that object
+                relationships exist by sending a 2305 error response code when a &lt;delete&gt;
+                command is attempted and fails due to existing object relationships. Delegated and
+                subordinate host objects associated with a domain object can be determined using the
+                &lt;info&gt; query command for the domain object.</documentation>
+        </annotation>
+    </element>
+    <element name="info" type="domain:infoType">
+        <annotation>
+            <documentation>Used to retrieve information associated with a domain object. The
+                response to this command MAY vary depending on the identity of the querying client,
+                use of authorization information, and server policy towards unauthorized clients. If
+                the querying client is the sponsoring client, all available information MUST be
+                returned. If the querying client is not the sponsoring client but the client
+                provides valid authorization information, all available information MUST be
+                returned. If the querying client is not the sponsoring client and the client does
+                not provide valid authorization information, server policy determines which OPTIONAL
+                elements are returned.</documentation>
+        </annotation>
+    </element>
+    <element name="renew" type="domain:renewType">
+        <annotation>
+            <documentation>Provides a transform operation that allows a client to extend the
+                validity period of a domain object.</documentation>
+        </annotation>
+    </element>
+    <element name="transfer" type="domain:transferType">
+        <annotation>
+            <documentation>Can be either a QUERY or TRANSFORM command. QUERY : Provides a query
+                operation that allows a client to determine the real-time status of pending and
+                completed transfer requests. TRANSFORM : Provides a transform operation that allows
+                a client to manage requests to transfer the sponsorship of a domain object.</documentation>
+        </annotation>
+    </element>
+    <element name="update" type="domain:updateType">
+        <annotation>
+            <documentation>Provides a transform operation that allows a client to modify the
+                attributes of a domain object.</documentation>
+        </annotation>
+    </element>
+
+    <!--
+   Child elements of the <create> command.
+   -->
+    <complexType name="createType">
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object to be
+                        created.</documentation>
+                </annotation>
+            </element>
+            <element name="period" type="domain:periodType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the initial registration period of the domain object. A
+                        server MAY define a default initial registration period if not specified by
+                        the client.</documentation>
+                </annotation>
+            </element>
+            <element name="ns" type="domain:nsType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the fully qualified names of the delegated host objects
+                        or host attributes (name servers) associated with the domain object to
+                        provide resolution services for the domain;</documentation>
+                </annotation>
+            </element>
+            <element name="registrant" type="eppcom:clIDType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the identifier for the human or organizational social
+                        information (contact) object to be associated with the domain object as the
+                        object registrant. This object identifier MUST be known to the server before
+                        the contact object can be associated with the domain object.</documentation>
+                </annotation>
+            </element>
+            <element name="contact" type="domain:contactType" minOccurs="0" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Contain the identifiers for other contact objects to be
+                        associated with the domain object. Contact object identifiers MUST be known
+                        to the server before the contact object can be associated with the domain
+                        object.</documentation>
+                </annotation>
+            </element>
+            <element name="authInfo" type="domain:authInfoType">
+                <annotation>
+                    <documentation>Contains authorization information to be associated with the
+                        domain object. This mapping includes a password-based authentication
+                        mechanism, but the schema allows new mechanisms to be defined in new
+                        schemas.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="periodType">
+        <simpleContent>
+            <extension base="domain:pLimitType">
+                <attribute name="unit" type="domain:pUnitType" use="required" />
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <simpleType name="pLimitType">
+        <restriction base="unsignedShort">
+            <minInclusive value="1" />
+            <maxInclusive value="99" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="pUnitType">
+        <restriction base="token">
+            <enumeration value="y" />
+            <enumeration value="m" />
+        </restriction>
+    </simpleType>
+
+    <complexType name="nsType">
+        <annotation>
+            <documentation> The EPP mapping for host objects is described in [RFC5732]. This
+                document assumes that domain name objects have a superordinate relationship to
+                subordinate host name objects. For example, domain name "example.com" has a
+                superordinate relationship to host name "ns1.example.com". EPP actions (such as
+                object transfers) that do not preserve this relationship MUST be explicitly
+                disallowed. Name server hosts for domain delegation can be specified either as
+                references to existing host objects or as domain attributes that describe a host
+                machine. Name servers are specified within a &lt;domain:ns&gt; element.</documentation>
+        </annotation>
+        <choice>
+            <element name="hostObj" type="eppcom:labelType" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Contains the fully qualified name of a known name server host
+                        object.</documentation>
+                </annotation>
+            </element>
+            <element name="hostAttr" type="domain:hostAttrType" maxOccurs="unbounded" />
+        </choice>
+    </complexType>
+
+    <!--
+   Name servers are either host objects or attributes.
+   -->
+    <complexType name="hostAttrType">
+        <sequence>
+            <element name="hostName" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of a host.</documentation>
+                </annotation>
+            </element>
+            <element name="hostAddr" type="host:addrType" minOccurs="0" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Contain the IP addresses to be associated with the host. Each
+                        element MAY contain an "ip" attribute to identify the IP address format.
+                        Attribute value "v4" is used to note IPv4 address format. Attribute value
+                        "v6" is used to note IPv6 address format. If the "ip" attribute is not
+                        specified, "v4" is the default attribute value.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   If attributes, addresses are optional and follow the
+   structure defined in the host mapping.
+   -->
+    <complexType name="contactType">
+        <simpleContent>
+            <extension base="eppcom:clIDType">
+                <attribute name="type" type="domain:contactAttrType" />
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <simpleType name="contactAttrType">
+        <restriction base="token">
+            <enumeration value="admin" />
+            <enumeration value="billing" />
+            <enumeration value="tech" />
+        </restriction>
+    </simpleType>
+
+    <complexType name="authInfoType">
+        <choice>
+            <element name="pw" type="eppcom:pwAuthInfoType" />
+            <element name="ext" type="eppcom:extAuthInfoType" />
+        </choice>
+    </complexType>
+
+    <!--
+   Child element of commands that require a single name.
+   -->
+    <complexType name="sNameType">
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object which
+                        receives the command.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Child element of commands that accept multiple names.
+   -->
+    <complexType name="mNameType">
+        <sequence>
+            <element name="name" type="eppcom:labelType" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object which
+                        receives the command.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Child elements of the <info> command.
+   -->
+    <complexType name="infoType">
+        <sequence>
+            <element name="name" type="domain:infoNameType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object to be
+                        queried.</documentation>
+                </annotation>
+            </element>
+            <element name="authInfo" type="domain:authInfoType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains authorization information associated with the domain
+                        object or authorization information associated with the domain object's
+                        registrant or associated contacts. If the authorization information is
+                        invalid, server policy determines if the command is rejected or if response
+                        information will be returned to the client.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="infoNameType">
+        <simpleContent>
+            <extension base="eppcom:labelType">
+                <attribute name="hosts" type="domain:hostsType" default="all">
+                    <annotation>
+                        <documentation>An OPTIONAL "hosts" attribute is available to control return
+                            of information describing hosts related to the domain object.</documentation>
+                    </annotation>
+                </attribute>
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <simpleType name="hostsType">
+        <restriction base="token">
+            <enumeration value="all">
+                <annotation>
+                    <documentation>Returns information describing both subordinate and delegated
+                        hosts</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="del">
+                <annotation>
+                    <documentation>Returns information describing only delegated hosts.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="none">
+                <annotation>
+                    <documentation>Returns no information describing delegated or subordinate hosts</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="sub">
+                <annotation>
+                    <documentation>Returns information describing only subordinate hosts.</documentation>
+                </annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>
+
+    <!--
+   Child elements of the <renew> command.
+   -->
+    <complexType name="renewType">
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object whose
+                        validity period is to be extended</documentation>
+                </annotation>
+            </element>
+            <element name="curExpDate" type="date">
+                <annotation>
+                    <documentation>Contains the date on which the current validity period ends. This
+                        value ensures that repeated &lt;renew&gt; commands do not result in
+                        multiple, unanticipated successful renewals.</documentation>
+                </annotation>
+            </element>
+            <element name="period" type="domain:periodType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the number of units to be added to the registration
+                        period of the domain object. The number of units available MAY be subject to
+                        limits imposed by the server.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Child elements of the <transfer> command.
+   -->
+    <complexType name="transferType">
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>QUERY : Contains the fully qualified name of the domain object to
+                        be queried. TRANSFORM : Contains the fully qualified name of the domain
+                        object for which a transfer request is to be created, approved, rejected, or
+                        cancelled.</documentation>
+                </annotation>
+            </element>
+            <element name="period" type="domain:periodType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the number of units to be added to the registration
+                        period of the domain object at completion of the transfer process. This
+                        element can only be used when a transfer is requested, and it MUST be
+                        ignored if used otherwise. The number of units available MAY be subject to
+                        limits imposed by the server.</documentation>
+                </annotation>
+            </element>
+            <element name="authInfo" type="domain:authInfoType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains authorization information associated with the domain
+                        object or authorization information associated with the domain object's
+                        registrant or associated contacts. An OPTIONAL "roid" attribute MUST be used
+                        to identify the registrant or contact object if and only if the given
+                        authInfo is associated with a registrant or contact object, and not the
+                        domain object itself. If this element is not provided or if the
+                        authorization information is invalid, server policy determines if the
+                        command is rejected or if response information will be returned to the
+                        client.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Child elements of the <update> command.
+   -->
+    <complexType name="updateType">
+        <annotation>
+            <documentation> At least one &lt;domain:add&gt; , &lt;domain:rem&gt;, or
+                &lt;domain:chg&gt; element (see below) MUST be provided if the command is not being
+                extended. All of these elements MAY be omitted if an &lt;update&gt; extension is
+                present. </documentation>
+        </annotation>
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object to be
+                        updated.</documentation>
+                </annotation>
+            </element>
+            <element name="add" type="domain:addRemType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains attribute values to be added to the object.</documentation>
+                </annotation>
+            </element>
+            <element name="rem" type="domain:addRemType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains attribute values to be removed from the object.</documentation>
+                </annotation>
+            </element>
+            <element name="chg" type="domain:chgType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains object attribute values to be changed.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Data elements that can be added or removed.
+   -->
+    <complexType name="addRemType">
+        <sequence>
+            <element name="ns" type="domain:nsType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the fully qualified names of the delegated host objects
+                        or host attributes (name servers) associated with the domain object to
+                        provide resolution services for the domain. A host object MUST be known to
+                        the server before the host object can be associated with a domain object. If
+                        host attributes are used to specify name servers, note that IP address
+                        elements are not needed to identify a name server that is being removed. IP
+                        address elements can safely be absent or ignored in this situation.</documentation>
+                </annotation>
+            </element>
+            <element name="contact" type="domain:contactType" minOccurs="0" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Contain the identifiers for contact objects to be associated with
+                        or removed from the domain object. Contact object identifiers MUST be known
+                        to the server before the contact object can be associated with the domain
+                        object. </documentation>
+                </annotation>
+            </element>
+            <element name="status" type="domain:statusType" minOccurs="0" maxOccurs="11">
+                <annotation>
+                    <documentation>Contain status values to be applied to or removed from the
+                        object. When specifying a value to be removed, only the attribute value is
+                        significant; element text is not required to match a value for removal.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Data elements that can be changed.
+   -->
+    <complexType name="chgType">
+        <sequence>
+            <element name="registrant" type="domain:clIDChgType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the identifier for the human or organizational social
+                        information (contact) object to be associated with the domain object as the
+                        object registrant. This object identifier MUST be known to the server before
+                        the contact object can be associated with the domain object. An empty
+                        element can be used to remove registrant information.</documentation>
+                </annotation>
+            </element>
+            <element name="authInfo" type="domain:authInfoChgType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains authorization information associated with the domain
+                        object. This mapping includes a password-based authentication mechanism, but
+                        the schema allows new mechanisms to be defined in new schemas. A &lt;domain:
+                        null&gt; element can be used within the &lt;domain:authInfo&gt; element to
+                        remove authorization information.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Allow the registrant value to be nullified by changing the
+   minLength restriction to "0".
+   -->
+    <simpleType name="clIDChgType">
+        <restriction base="token">
+            <minLength value="0" />
+            <maxLength value="16" />
+        </restriction>
+    </simpleType>
+
+    <!--
+   Allow the authInfo value to be nullified by including an
+   empty element within the choice.
+   -->
+    <complexType name="authInfoChgType">
+        <choice>
+            <element name="pw" type="eppcom:pwAuthInfoType" />
+            <element name="ext" type="eppcom:extAuthInfoType" />
+            <element name="null" />
+        </choice>
+    </complexType>
+
+    <!--
+    Child response elements.
+
+    Note : the XSD does not hook the child response to the relevant command
+    => i.e the XSD does not state that <domain:trnData> is the right response to the command
+    <domain:transfer>
+    But, the XSD defines the form of the <domain:trnData> response
+    Which means that :
+        - The EPP server MUST implement the link between a command and a response
+        - But the XML response must be formatted as per the RFC
+
+    That's why the XSD resData type is defined as a loose generic bucket (see RFC 5730 XSD file), but
+    the implementation of each possible child of resData is strongly defined (see RFC 5731, 5732, 5733)
+
+    -->
+
+    <element name="chkData" type="domain:chkDataType">
+        <annotation>
+            <documentation>Response to domain:check. Must identify the domain namespace with
+                attribute xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"</documentation>
+        </annotation>
+    </element>
+    <element name="creData" type="domain:creDataType">
+        <annotation>
+            <documentation>Response to domain:create. Must identify the domain namespace with
+                attribute xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"</documentation>
+        </annotation>
+    </element>
+    <element name="infData" type="domain:infDataType">
+        <annotation>
+            <documentation>Response to domain:info. Must identify the domain namespace with
+                attribute xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"</documentation>
+        </annotation>
+    </element>
+    <element name="panData" type="domain:panDataType">
+        <annotation>
+            <documentation>Commands are processed by a server in the order they are received from a
+                client. Though an immediate response confirming receipt and processing of the
+                command is produced by the server, a server operator MAY perform an offline review
+                of requested transform commands before completing the requested action. In such
+                situations, the response from the server MUST clearly note that the transform
+                command has been received and processed but that the requested action is pending.
+                The status of the corresponding object MUST clearly reflect processing of the
+                pending action. The server MUST notify the client when offline processing of the
+                action has been completed. The service message MUST contain text that describes the
+                notification in the child &lt;msg&gt; element of the response &lt;msgQ&gt; element.
+                In addition, the EPP &lt;resData&gt; element MUST contain a child &lt;domain:
+                panData&gt; element that must identify the domain namespace with attribute
+                xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"</documentation>
+        </annotation>
+    </element>
+    <element name="renData" type="domain:renDataType">
+        <annotation>
+            <documentation>Response to domain:renew command. Must identify the domain namespace with
+                attribute xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"</documentation>
+        </annotation>
+    </element>
+    <element name="trnData" type="domain:trnDataType">
+        <annotation>
+            <documentation>Response to domain:transfer command. Must identify the domain namespace
+                with attribute xmlns:domain="urn:ietf:params:xml:ns:domain-1.0"</documentation>
+        </annotation>
+    </element>
+
+    <!--
+   <check> response elements.
+   -->
+    <complexType name="chkDataType">
+        <sequence>
+            <element name="cd" type="domain:checkType" maxOccurs="unbounded" />
+        </sequence>
+    </complexType>
+
+    <complexType name="checkType">
+        <sequence>
+            <element name="name" type="domain:checkNameType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the queried domain object.
+                        This element MUST contain an "avail" attribute (see domain:checkNameType)
+                        whose value indicates object availability (can it be provisioned or not) at
+                        the moment the &lt;check&gt; command was completed.</documentation>
+                </annotation>
+            </element>
+            <element name="reason" type="eppcom:reasonType" minOccurs="0">
+                <annotation>
+                    <documentation>MAY be provided when an object cannot be provisioned. If present,
+                        this element contains server-specific text to help explain why the object
+                        cannot be provisioned. This text MUST be represented in the response
+                        language previously negotiated with the client</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="checkNameType">
+        <simpleContent>
+            <extension base="eppcom:labelType">
+                <attribute name="avail" type="boolean" use="required">
+                    <annotation>
+                        <documentation>A value of "1" or "true" means that the object can be
+                            provisioned. A value of "0" or "false" means that the object can not be
+                            provisioned.</documentation>
+                    </annotation>
+                </attribute>
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <!--
+   <create> response elements.
+   -->
+    <complexType name="creDataType">
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object.</documentation>
+                </annotation>
+            </element>
+            <element name="crDate" type="dateTime">
+                <annotation>
+                    <documentation>Contains the date and time of domain object creation.</documentation>
+                </annotation>
+            </element>
+            <element name="exDate" type="dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the date and time identifying the end of the domain
+                        object's registration period.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   <info> response elements.
+   -->
+
+    <complexType name="infDataType">
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object. </documentation>
+                </annotation>
+            </element>
+            <element name="roid" type="eppcom:roidType">
+                <annotation>
+                    <documentation>Contains the Repository Object IDentifier assigned to the domain
+                        object when the object was created.</documentation>
+                </annotation>
+            </element>
+            <element name="status" type="domain:statusType" minOccurs="0" maxOccurs="11">
+                <annotation>
+                    <documentation>Contain the current status descriptors associated with the
+                        domain.</documentation>
+                </annotation>
+            </element>
+            <element name="registrant" type="eppcom:clIDType" minOccurs="0">
+                <annotation>
+                    <documentation>If supported by the server, contain identifiers for the human or
+                        organizational social information objects (here the registrant) associated
+                        with the domain object.</documentation>
+                </annotation>
+            </element>
+            <element name="contact" type="domain:contactType" minOccurs="0" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>If supported by the server, contain identifiers for the human or
+                        organizational social information objects (here the contact) associated with
+                        the domain object.</documentation>
+                </annotation>
+            </element>
+            <element name="ns" type="domain:nsType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the fully qualified names of the delegated host objects
+                        or host attributes (name servers) associated with the domain object.</documentation>
+                </annotation>
+            </element>
+            <element name="host" type="eppcom:labelType" minOccurs="0" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Contain the fully qualified names of the subordinate host objects
+                        that exist under this superordinate domain object.</documentation>
+                </annotation>
+            </element>
+            <element name="clID" type="eppcom:clIDType">
+                <annotation>
+                    <documentation>Contains the identifier of the sponsoring client.</documentation>
+                </annotation>
+            </element>
+            <element name="crID" type="eppcom:clIDType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the identifier of the client that created the domain
+                        object.</documentation>
+                </annotation>
+            </element>
+            <element name="crDate" type="dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the date and time of domain object creation.</documentation>
+                </annotation>
+            </element>
+            <element name="upID" type="eppcom:clIDType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the identifier of the client that last updated the
+                        domain object. This element MUST NOT be present if the domain has never been
+                        modified.</documentation>
+                </annotation>
+            </element>
+            <element name="upDate" type="dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the date and time of the most recent domain-object
+                        modification. This element MUST NOT be present if the domain object has
+                        never been modified.</documentation>
+                </annotation>
+            </element>
+            <element name="exDate" type="dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the date and time identifying the end of the domain
+                        object's registration period.</documentation>
+                </annotation>
+            </element>
+            <element name="trDate" type="dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the date and time of the most recent successful
+                        domain-object transfer. This element MUST NOT be provided if the domain
+                        object has never been transferred.</documentation>
+                </annotation>
+            </element>
+            <element name="authInfo" type="domain:authInfoType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains authorization information associated with the domain
+                        object. This element MUST only be returned if the querying client is the
+                        current sponsoring client or if the client supplied valid authorization
+                        information with the command. </documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Status is a combination of attributes and an optional
+   human-readable message that may be expressed in languages other
+   than English.
+   -->
+    <complexType name="statusType">
+        <simpleContent>
+            <extension base="normalizedString">
+                <attribute name="s" type="domain:statusValueType" use="required" />
+                <attribute name="lang" type="language" default="en" />
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <simpleType name="statusValueType">
+        <restriction base="token">
+            <enumeration value="clientDeleteProhibited">
+                <annotation>
+                    <documentation>Requests to delete the object MUST be rejected.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="clientHold">
+                <annotation>
+                    <documentation>DNS delegation information MUST NOT be published for the object.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="clientRenewProhibited">
+                <annotation>
+                    <documentation>Requests to renew the object MUST be rejected.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="clientTransferProhibited">
+                <annotation>
+                    <documentation>Requests to transfer the object MUST be rejected. </documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="clientUpdateProhibited">
+                <annotation>
+                    <documentation>Requests to update the object (other than to remove this status)
+                        MUST be rejected.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="inactive">
+                <annotation>
+                    <documentation>Delegation information has not been associated with the object.
+                        This is the default status when a domain object is first created and there
+                        are no associated host objects for the DNS delegation. This status can also
+                        be set by the server when all host-object associations are removed.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="ok">
+                <annotation>
+                    <documentation>This is the normal status value for an object that has no pending
+                        operations or prohibitions. This value is set and removed by the server as
+                        other status values are added or removed. "ok" status MUST NOT be combined
+                        with any other status.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="pendingCreate">
+                <annotation>
+                    <documentation>A transform command has been processed for the object, but the
+                        action has not been completed by the server. Server operators can delay
+                        action completion for a variety of reasons, such as to allow for human
+                        review or third-party action. A transform command that is processed, but
+                        whose requested action is pending, is noted with response code 1001. When
+                        the requested action has been completed, the pendingCreate, pendingDelete,
+                        pendingRenew, pendingTransfer, or pendingUpdate status value MUST be
+                        removed. All clients involved in the transaction MUST be notified using a
+                        service message that the action has been completed and that the status of
+                        the object has changed.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="pendingDelete">
+                <annotation>
+                    <documentation>A transform command has been processed for the object, but the
+                        action has not been completed by the server. Server operators can delay
+                        action completion for a variety of reasons, such as to allow for human
+                        review or third-party action. A transform command that is processed, but
+                        whose requested action is pending, is noted with response code 1001. When
+                        the requested action has been completed, the pendingCreate, pendingDelete,
+                        pendingRenew, pendingTransfer, or pendingUpdate status value MUST be
+                        removed. All clients involved in the transaction MUST be notified using a
+                        service message that the action has been completed and that the status of
+                        the object has changed. "pendingDelete" status MUST NOT be combined with
+                        either "clientDeleteProhibited" or "serverDeleteProhibited" status.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="pendingRenew">
+                <annotation>
+                    <documentation>A transform command has been processed for the object, but the
+                        action has not been completed by the server. Server operators can delay
+                        action completion for a variety of reasons, such as to allow for human
+                        review or third-party action. A transform command that is processed, but
+                        whose requested action is pending, is noted with response code 1001. When
+                        the requested action has been completed, the pendingCreate, pendingDelete,
+                        pendingRenew, pendingTransfer, or pendingUpdate status value MUST be
+                        removed. All clients involved in the transaction MUST be notified using a
+                        service message that the action has been completed and that the status of
+                        the object has changed. "pendingRenew" status MUST NOT be combined with
+                        either "clientRenewProhibited" or "serverRenewProhibited" status.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="pendingTransfer">
+                <annotation>
+                    <documentation>A transform command has been processed for the object, but the
+                        action has not been completed by the server. Server operators can delay
+                        action completion for a variety of reasons, such as to allow for human
+                        review or third-party action. A transform command that is processed, but
+                        whose requested action is pending, is noted with response code 1001. When
+                        the requested action has been completed, the pendingCreate, pendingDelete,
+                        pendingRenew, pendingTransfer, or pendingUpdate status value MUST be
+                        removed. All clients involved in the transaction MUST be notified using a
+                        service message that the action has been completed and that the status of
+                        the object has changed. "pendingTransfer" status MUST NOT be combined with
+                        either "clientTransferProhibited" or "serverTransferProhibited" status. </documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="pendingUpdate">
+                <annotation>
+                    <documentation>A transform command has been processed for the object, but the
+                        action has not been completed by the server. Server operators can delay
+                        action completion for a variety of reasons, such as to allow for human
+                        review or third-party action. A transform command that is processed, but
+                        whose requested action is pending, is noted with response code 1001. When
+                        the requested action has been completed, the pendingCreate, pendingDelete,
+                        pendingRenew, pendingTransfer, or pendingUpdate status value MUST be
+                        removed. All clients involved in the transaction MUST be notified using a
+                        service message that the action has been completed and that the status of
+                        the object has changed. "pendingUpdate" status MUST NOT be combined with
+                        either "clientUpdateProhibited" or "serverUpdateProhibited" status. </documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="serverDeleteProhibited">
+                <annotation>
+                    <documentation>Requests to delete the object MUST be rejected.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="serverHold">
+                <annotation>
+                    <documentation>DNS delegation information MUST NOT be published for the object.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="serverRenewProhibited">
+                <annotation>
+                    <documentation>Requests to renew the object MUST be rejected.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="serverTransferProhibited">
+                <annotation>
+                    <documentation>Requests to transfer the object MUST be rejected. </documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="serverUpdateProhibited">
+                <annotation>
+                    <documentation>Requests to update the object (other than to remove this status)
+                        MUST be rejected.</documentation>
+                </annotation>
+            </enumeration>
+        </restriction>
+
+    </simpleType>
+
+    <!--
+   Pending action notification response elements.
+   -->
+    <complexType name="panDataType">
+        <sequence>
+            <element name="name" type="domain:paNameType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object. Contains
+                        a REQUIRED "paResult" attribute. A positive boolean value indicates that the
+                        request has been approved and completed. A negative boolean value indicates
+                        that the request has been denied and the requested action has not been
+                        taken.</documentation>
+                </annotation>
+            </element>
+            <element name="paTRID" type="epp:trIDType">
+                <annotation>
+                    <documentation>Contains the client transaction identifier and server transaction
+                        identifier returned with the original response to process the command. The
+                        client transaction identifier is OPTIONAL and will only be returned if the
+                        client provided an identifier with the original &lt;create&gt; command.</documentation>
+                </annotation>
+            </element>
+            <element name="paDate" type="dateTime">
+                <annotation>
+                    <documentation>Contains the date and time describing when review of the
+                        requested action was completed.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="paNameType">
+        <simpleContent>
+            <extension base="eppcom:labelType">
+                <attribute name="paResult" type="boolean" use="required" />
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <!--
+   <renew> response elements.
+   -->
+    <complexType name="renDataType">
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object.</documentation>
+                </annotation>
+            </element>
+            <element name="exDate" type="dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the date and time identifying the end of the domain
+                        object's registration period.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   <transfer> response elements.
+   -->
+    <complexType name="trnDataType">
+        <sequence>
+            <element name="name" type="eppcom:labelType">
+                <annotation>
+                    <documentation>Contains the fully qualified name of the domain object. </documentation>
+                </annotation>
+            </element>
+            <element name="trStatus" type="eppcom:trStatusType">
+                <annotation>
+                    <documentation>Contains the state of the most recent transfer request.</documentation>
+                </annotation>
+            </element>
+            <element name="reID" type="eppcom:clIDType">
+                <annotation>
+                    <documentation>Contains the identifier of the client that requested the object
+                        transfer.</documentation>
+                </annotation>
+            </element>
+            <element name="reDate" type="dateTime">
+                <annotation>
+                    <documentation>Contains the date and time that the transfer was requested. </documentation>
+                </annotation>
+            </element>
+            <element name="acID" type="eppcom:clIDType">
+                <annotation>
+                    <documentation>Contains the identifier of the client that SHOULD act upon a
+                        PENDING transfer request. For all other status types, the value identifies
+                        the client that took the indicated action. </documentation>
+                </annotation>
+            </element>
+            <element name="acDate" type="dateTime">
+                <annotation>
+                    <documentation>Contains the date and time of a required or completed response.
+                        For a PENDING request, the value identifies the date and time by which a
+                        response is required before an automated response action will be taken by
+                        the server. For all other status types, the value identifies the date and
+                        time when the request was completed.</documentation>
+                </annotation>
+            </element>
+            <element name="exDate" type="dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the end of the domain object's validity period if the
+                        &lt;transfer&gt; command caused or causes a change in the validity period.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   End of schema.
+   -->
+</schema>

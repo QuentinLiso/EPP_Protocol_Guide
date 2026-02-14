@@ -1,0 +1,1200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema targetNamespace="urn:ietf:params:xml:ns:epp-1.0"
+    xmlns:epp="urn:ietf:params:xml:ns:epp-1.0"
+    xmlns:eppcom="urn:ietf:params:xml:ns:eppcom-1.0"
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified">
+
+    <!--
+   Import common element types.
+   -->
+    <import namespace="urn:ietf:params:xml:ns:eppcom-1.0"
+        schemaLocation="./0_eppcom_annotated.xsd" />
+
+    <annotation>
+        <documentation> Extensible Provisioning Protocol v1.0 schema. </documentation>
+    </annotation>
+
+    <!--
+   Every EPP XML instance must begin with this element.
+   -->
+    <element name="epp" type="epp:eppType">
+        <annotation>
+            <documentation> All EPP XML instances MUST begin with an &lt;epp&gt; element. This
+                element identifies the start of an EPP protocol element and the namespace used
+                within the protocol. The &lt;epp&gt; start element and the associated &lt;epp/&gt;
+                ending element MUST be applied to all structures sent by both clients and servers. </documentation>
+        </annotation>
+    </element>
+
+    <!--
+   An EPP XML instance must contain a greeting, hello, command,
+   response, or extension.
+   -->
+    <complexType name="eppType">
+        <choice>
+            <element name="greeting" type="epp:greetingType">
+                <annotation>
+                    <documentation> An EPP server responds to a successful connection and
+                        &lt;hello&gt; element by returning a &lt;greeting&gt; element to the client </documentation>
+                </annotation>
+            </element>
+            <element name="hello">
+                <annotation>
+                    <documentation> EPP MAY be carried over both connection-oriented and
+                        connection-less transport protocols. An EPP client MAY request a
+                        &lt;greeting&gt; from an EPP server at any time between a successful
+                        &lt;login&gt; command and a &lt;logout&gt; command by sending a
+                        &lt;hello&gt; to a server. Use of this element is essential in a
+                        connection-less environment where a server cannot return a &lt;greeting&gt;
+                        in response to a client-initiated connection. An EPP &lt;hello&gt; MUST be
+                        an empty element with no child elements</documentation>
+                </annotation>
+            </element>
+            <element name="command" type="epp:commandType">
+                <annotation>
+                    <documentation>An EPP client interacts with an EPP server by sending a command
+                        to the server and receiving a response from the server.</documentation>
+                </annotation>
+            </element>
+            <element name="response" type="epp:responseType">
+                <annotation>
+                    <documentation>An EPP server responds to a client command by returning a
+                        response to the client. EPP commands are atomic, so a command will either
+                        succeed completely or fail completely. Success and failure results MUST NOT
+                        be mixed</documentation>
+                </annotation>
+            </element>
+            <element name="extension" type="epp:extAnyType">
+                <annotation>
+                    <documentation> The EPP extension framework allows for definition of new
+                        protocol elements identified using XML namespace notation with a reference
+                        to an XML schema that defines the namespace. Children of the
+                        &lt;extension&gt; define the extension</documentation>
+                </annotation>
+            </element>
+        </choice>
+    </complexType>
+
+    <!--
+   A greeting is sent by a server in response to a client connection
+   or <hello>.
+   -->
+    <complexType name="greetingType">
+        <sequence>
+            <element name="svID" type="epp:sIDType">
+                <annotation>
+                    <documentation>Contains the name of the server.</documentation>
+                </annotation>
+            </element>
+            <element name="svDate" type="dateTime">
+                <annotation>
+                    <documentation> Contains the server's current date and time in Universal
+                        Coordinated Time (UTC) </documentation>
+                </annotation>
+            </element>
+            <element name="svcMenu" type="epp:svcMenuType">
+                <annotation>
+                    <documentation>Identifies the services supported by the server</documentation>
+                </annotation>
+            </element>
+            <element name="dcp" type="epp:dcpType">
+                <annotation>
+                    <documentation>(data collection policy) element that contains child elements
+                        used to describe the server's privacy policy for data collection and
+                        management. Policy implications usually extend beyond the client-server
+                        relationship. Both clients and servers can have relationships with other
+                        entities that need to know the server operator's data collection policy to
+                        make informed provisioning decisions.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Server IDs are strings with minimum and maximum length restrictions.
+   -->
+    <simpleType name="sIDType">
+        <restriction base="normalizedString">
+            <minLength value="3" />
+            <maxLength value="64" />
+        </restriction>
+    </simpleType>
+
+    <!--
+   A server greeting identifies available object services.
+   -->
+    <complexType name="svcMenuType">
+        <sequence>
+            <element name="version" type="epp:versionType" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Identify the protocol versions supported by the server</documentation>
+                </annotation>
+            </element>
+            <element name="lang" type="language" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Contain the identifiers of the text response languages known by
+                        the server</documentation>
+                </annotation>
+            </element>
+            <element name="objURI" type="anyURI" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Contain namespace URIs representing the objects that the server
+                        is capable of managing. A server MAY limit object management privileges on a
+                        per-client basis</documentation>
+                </annotation>
+            </element>
+            <element name="svcExtension" type="epp:extURIType" minOccurs="0">
+                <annotation>
+                    <documentation>contains one or more &lt;extURI&gt; elements that contain
+                        namespace URIs representing object extensions supported by the server</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   Data Collection Policy types.
+   -->
+    <complexType name="dcpType">
+        <sequence>
+            <element name="access" type="epp:dcpAccessType">
+                <annotation>
+                    <documentation>Describes the access provided by the server to the client on
+                        behalf of the originating data source</documentation>
+                </annotation>
+            </element>
+            <element name="statement" type="epp:dcpStatementType" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Describe data collection purposes, data recipients, and data
+                        retention.</documentation>
+                </annotation>
+            </element>
+            <element name="expiry" type="epp:dcpExpiryType" minOccurs="0">
+                <annotation>
+                    <documentation>Describes the lifetime of the policy</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="dcpAccessType">
+        <choice>
+            <element name="all">
+                <annotation>
+                    <documentation>Access is given to all identified data.</documentation>
+                </annotation>
+            </element>
+            <element name="none">
+                <annotation>
+                    <documentation>No access is provided to identified data.</documentation>
+                </annotation>
+            </element>
+            <element name="null">
+                <annotation>
+                    <documentation>Data is not persistent, so no access is possible.</documentation>
+                </annotation>
+            </element>
+            <element name="other">
+                <annotation>
+                    <documentation>Access is given to other identified data of a non-personal
+                        nature.</documentation>
+                </annotation>
+            </element>
+            <element name="personal">
+                <annotation>
+                    <documentation>Access is given to identified data relating to individuals and
+                        organizational entities</documentation>
+                </annotation>
+            </element>
+            <element name="personalAndOther">
+                <annotation>
+                    <documentation>Access is given to identified data relating to individuals,
+                        organizational entities, and other data of a non-personal nature.</documentation>
+                </annotation>
+            </element>
+        </choice>
+    </complexType>
+
+    <complexType name="dcpStatementType">
+        <sequence>
+            <element name="purpose" type="epp:dcpPurposeType">
+                <annotation>
+                    <documentation>Describe the purposes for which data is collected</documentation>
+                </annotation>
+            </element>
+            <element name="recipient" type="epp:dcpRecipientType">
+                <annotation>
+                    <documentation>Describes the recipients of collected data</documentation>
+                </annotation>
+            </element>
+            <element name="retention" type="epp:dcpRetentionType">
+                <annotation>
+                    <documentation>Describes data retention practices</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="dcpPurposeType">
+        <sequence>
+            <element name="admin" minOccurs="0">
+                <annotation>
+                    <documentation>Administrative purposes. Information can be used for
+                        administrative and technical support of the provisioning system.</documentation>
+                </annotation>
+            </element>
+            <element name="contact" minOccurs="0">
+                <annotation>
+                    <documentation>Contact for marketing purposes. Information can be used to
+                        contact individuals, through a communications channel other than the
+                        protocol, for the promotion of a product or service.</documentation>
+                </annotation>
+            </element>
+            <element name="other" minOccurs="0">
+                <annotation>
+                    <documentation>Other purposes. Information may be used in other ways not
+                        captured by the above definitions.</documentation>
+                </annotation>
+            </element>
+            <element name="prov" minOccurs="0">
+                <annotation>
+                    <documentation>Object-provisioning purposes. Information can be used to identify
+                        objects and inter-object relationships.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="dcpRecipientType">
+        <sequence>
+            <element name="other" minOccurs="0">
+                <annotation>
+                    <documentation>Other entities following unknown practices</documentation>
+                </annotation>
+            </element>
+            <element name="ours" type="epp:dcpOursType" minOccurs="0" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Server operator and/or entities acting as agents or entities for
+                        whom the server operator is acting as an agent. An agent in this instance is
+                        defined as a third party that processes data only on behalf of the service
+                        provider for the completion of the stated purposes</documentation>
+                </annotation>
+            </element>
+            <element name="public" minOccurs="0">
+                <annotation>
+                    <documentation>Public forums.</documentation>
+                </annotation>
+            </element>
+            <element name="same" minOccurs="0">
+                <annotation>
+                    <documentation>Other entities following server practices.</documentation>
+                </annotation>
+            </element>
+            <element name="unrelated" minOccurs="0">
+                <annotation>
+                    <documentation>Unrelated third parties.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="dcpOursType">
+        <sequence>
+            <element name="recDesc" type="epp:dcpRecDescType" minOccurs="0">
+                <annotation>
+                    <documentation>Describe the recipient</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <simpleType name="dcpRecDescType">
+        <restriction base="token">
+            <minLength value="1" />
+            <maxLength value="255" />
+        </restriction>
+    </simpleType>
+
+    <complexType name="dcpRetentionType">
+        <choice>
+            <element name="business">
+                <annotation>
+                    <documentation>Data persists per business practices.</documentation>
+                </annotation>
+            </element>
+            <element name="indefinite">
+                <annotation>
+                    <documentation>Data persists indefinitely.</documentation>
+                </annotation>
+            </element>
+            <element name="legal">
+                <annotation>
+                    <documentation>Data persists per legal requirements.</documentation>
+                </annotation>
+            </element>
+            <element name="none">
+                <annotation>
+                    <documentation>Data is not persistent and is not retained for more than a brief
+                        period of time necessary to make use of it during the course of a single
+                        online interaction.</documentation>
+                </annotation>
+            </element>
+            <element name="stated">
+                <annotation>
+                    <documentation>Data persists to meet the stated purpose</documentation>
+                </annotation>
+            </element>
+        </choice>
+    </complexType>
+
+    <complexType name="dcpExpiryType">
+        <choice>
+            <element name="absolute" type="dateTime">
+                <annotation>
+                    <documentation>The policy is valid from the current date and time until it
+                        expires on the specified date and time.</documentation>
+                </annotation>
+            </element>
+            <element name="relative" type="duration">
+                <annotation>
+                    <documentation>The policy is valid from the current date and time until the end
+                        of the specified duration. </documentation>
+                </annotation>
+            </element>
+        </choice>
+
+    </complexType>
+
+    <!--
+   Extension framework types.
+   -->
+    <complexType name="extAnyType">
+        <annotation>
+            <documentation>We can have as many &lt;foo&gt; children on the condition that they
+                describe the xmlns they use, like that : &lt;foo xmlns:foo="..."&gt;&lt;/foo&gt;
+                These foo tags can have any sub-children &lt;bar&gt;, and MUST start with
+                &lt;foo:bar&gt;</documentation>
+        </annotation>
+        <sequence>
+            <any namespace="##other" maxOccurs="unbounded" />
+        </sequence>
+    </complexType>
+
+    <complexType name="extURIType">
+        <sequence>
+            <element name="extURI" type="anyURI" maxOccurs="unbounded" />
+        </sequence>
+    </complexType>
+
+    <!--
+   An EPP version number is a dotted pair of decimal numbers.
+   -->
+    <simpleType name="versionType">
+        <restriction base="token">
+            <pattern value="[1-9]+\.[0-9]+" />
+            <enumeration value="1.0" />
+        </restriction>
+    </simpleType>
+
+    <!--
+   Command types.
+   -->
+    <complexType name="commandType">
+        <sequence>
+            <choice>
+                <element name="check" type="epp:readWriteType">
+                    <annotation>
+                        <documentation>The EPP &lt;check&gt; command is used to determine if an
+                            object can be provisioned within a repository. It provides a hint that
+                            allows a client to anticipate the success or failure of provisioning an
+                            object using the &lt;create&gt; command as object-provisioning
+                            requirements are ultimately a matter of server policy.</documentation>
+                    </annotation>
+                </element>
+                <element name="create" type="epp:readWriteType">
+                    <annotation>
+                        <documentation>The EPP &lt;create&gt; command is used to create an instance
+                            of an object. An object can be created for an indefinite period of time,
+                            or an object can be created for a specific validity period. The EPP
+                            mapping for an object MUST describe the status of an object with respect
+                            to time in order to include expected client and server behavior if a
+                            validity period is used.</documentation>
+                    </annotation>
+                </element>
+                <element name="delete" type="epp:readWriteType">
+                    <annotation>
+                        <documentation>The EPP &lt;delete&gt; command is used to remove an instance
+                            of an existing object.</documentation>
+                    </annotation>
+                </element>
+                <element name="info" type="epp:readWriteType">
+                    <annotation>
+                        <documentation>The EPP &lt;info&gt; command is used to retrieve information
+                            associated with an existing object.</documentation>
+                    </annotation>
+                </element>
+                <element name="login" type="epp:loginType">
+                    <annotation>
+                        <documentation>The EPP &lt;login&gt; command is used to establish a session
+                            with an EPP server in response to a greeting issued by the server. A
+                            &lt;login&gt; command MUST be sent to a server before any other EPP
+                            command to establish an ongoing session. A server operator MAY limit the
+                            number of failed login attempts N, 1 &lt;= N &lt;= infinity, after which
+                            a login failure results in the connection to the server (if a connection
+                            exists) being closed. A client identifier and initial password MUST be
+                            created on the server before a client can successfully complete a
+                            &lt;login&gt; command. The client identifier and initial password MUST
+                            be delivered to the client using an out-of-band method that protects the
+                            identifier and password from inadvertent disclosure. </documentation>
+                    </annotation>
+                </element>
+                <element name="logout">
+                    <annotation>
+                        <documentation>The EPP &lt;logout&gt; command is used to end a session with
+                            an EPP server. The &lt;logout&gt; command MUST be represented as an
+                            empty element with no child elements. A server MAY end a session due to
+                            client inactivity or excessive client-session longevity. The parameters
+                            for determining excessive client inactivity or session longevity are a
+                            matter of server policy and are not specified by this protocol.</documentation>
+                    </annotation>
+                </element>
+                <element name="poll" type="epp:pollType">
+                    <annotation>
+                        <documentation>The EPP &lt;poll&gt; command is used to discover and retrieve
+                            service messages queued by a server for individual clients.</documentation>
+                    </annotation>
+                </element>
+                <element name="renew" type="epp:readWriteType">
+                    <annotation>
+                        <documentation>The EPP &lt;renew&gt; command is used to extend the validity
+                            period of an existing object.</documentation>
+                    </annotation>
+                </element>
+                <element name="transfer" type="epp:transferType">
+                    <annotation>
+                        <documentation>The EPP &lt;transfer&gt; command provides both a QUERY
+                            operation or a TRANSFORM operation depending on the context. QUERY :
+                            allows a client to determine real-time status of pending and completed
+                            transfer requests. TRANSFORM: manage changes in client sponsorship of an
+                            existing object. Clients can initiate a transfer request, cancel a
+                            transfer request, approve a transfer request, and reject a transfer
+                            request</documentation>
+                    </annotation>
+                </element>
+                <element name="update" type="epp:readWriteType">
+                    <annotation>
+                        <documentation>The EPP &lt;update&gt; command is used to change information
+                            associated with an existing object.</documentation>
+                    </annotation>
+                </element>
+            </choice>
+            <element name="extension" type="epp:extAnyType" minOccurs="0">
+                <annotation>
+                    <documentation>MAY be used for server-defined command extensions. EPP provides a
+                        facility for protocol command and response extensions. Protocol commands and
+                        responses MAY be extended by an &lt;extension&gt; element that contains
+                        additional elements whose syntax and semantics are not explicitly defined by
+                        EPP or an EPP object mapping. This element is OPTIONAL. Extensions are
+                        typically defined by agreement between client and server and MAY be used to
+                        extend EPP for unique operational needs.</documentation>
+                </annotation>
+            </element>
+
+            <element name="clTRID" type="epp:trIDStringType" minOccurs="0">
+                <annotation>
+                    <documentation>(client transaction identifier) element that MAY be used to
+                        uniquely identify the command to the client. Clients are responsible for
+                        maintaining their own transaction identifier space to ensure uniqueness.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   The <login> command.
+   -->
+    <complexType name="loginType">
+        <sequence>
+            <element name="clID" type="eppcom:clIDType">
+                <annotation>
+                    <documentation>Contains the client identifier assigned to the client by the
+                        server</documentation>
+                </annotation>
+            </element>
+            <element name="pw" type="epp:pwType">
+                <annotation>
+                    <documentation>Contains the client's plain text password. The value of this
+                        element is case sensitive.</documentation>
+                </annotation>
+            </element>
+            <element name="newPW" type="epp:pwType"
+                minOccurs="0">
+                <annotation>
+                    <documentation>Contains a new plain text password to be assigned to the client
+                        for use with subsequent &lt;login&gt; commands. The value of this element is
+                        case sensitive</documentation>
+                </annotation>
+            </element>
+            <element name="options" type="epp:credsOptionsType">
+                <annotation>
+                    <documentation>Login options</documentation>
+                </annotation>
+            </element>
+            <element name="svcs" type="epp:loginSvcType">
+                <annotation>
+                    <documentation>Contains one or more &lt;objURI&gt; elements that contain
+                        namespace URIs representing the objects to be managed during the session.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="credsOptionsType">
+        <sequence>
+            <element name="version" type="epp:versionType">
+                <annotation>
+                    <documentation>Contains the protocol version to be used for the command or
+                        ongoing server session. MUST exactly match one of the values presented in
+                        the EPP greeting</documentation>
+                </annotation>
+            </element>
+            <element name="lang" type="language">
+                <annotation>
+                    <documentation>Contains the text response language to be used for the command or
+                        ongoing server session commands. MUST exactly match one of the values
+                        presented in the EPP greeting</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <simpleType name="pwType">
+        <restriction base="token">
+            <minLength value="6" />
+            <maxLength value="16" />
+        </restriction>
+    </simpleType>
+
+    <complexType name="loginSvcType">
+        <sequence>
+            <element name="objURI" type="anyURI"
+                maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Elements that contain namespace URIs representing the objects to
+                        be managed during the session</documentation>
+                </annotation>
+            </element>
+            <element name="svcExtension" type="epp:extURIType"
+                minOccurs="0">
+                <annotation>
+                    <documentation>Contains one or more &lt;extURI&gt; elements that identify object
+                        extensions to be used during the session.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!--
+   The <poll> command.
+   -->
+    <complexType name="pollType">
+        <annotation>
+            <documentation>CONTEXT: Each response returned from the server includes a server-unique
+                message identifier (see msqQ type in &lt;response&gt; below) that MUST be provided
+                to acknowledge receipt of the message, and a counter that indicates the number of
+                messages in the queue. Service messages SHOULD be created for passive clients
+                affected by an action on an object. Service messages MAY also be created for active
+                clients that request an action on an object, though such messages MUST NOT replace
+                the normal protocol response to the request</documentation>
+        </annotation>
+
+        <attribute name="op" type="epp:pollOpType"
+            use="required" />
+
+        <attribute name="msgID" type="token" />
+    </complexType>
+
+    <simpleType name="pollOpType">
+        <restriction base="token">
+            <enumeration value="ack">
+                <annotation>
+                    <documentation>After a message has been received by the client, the client MUST
+                        respond to the message with an explicit acknowledgement to confirm that the
+                        message has been received. A server MUST dequeue the message and decrement
+                        the queue counter after receiving acknowledgement from the client, making
+                        the next message in the queue (if any) available for retrieval. An "op"
+                        attribute (with value "ack") and a "msgID" attribute (whose value
+                        corresponds to the value of the "id" attribute copied from the &lt;msg&gt;
+                        element in the message being acknowledged) are REQUIRED to acknowledge
+                        receipt of a message.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="req">
+                <annotation>
+                    <documentation>A poll command with "op" attribute with value "req" is REQUIRED
+                        to retrieve the first message from the server message queue.</documentation>
+                </annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>
+
+    <!--
+   The <transfer> command.  This is object-specific, and uses attributes
+   to identify the requested operation.
+   -->
+    <complexType name="transferType">
+        <sequence>
+            <any namespace="##other">
+                <annotation>
+                    <documentation>The elements needed to identify an object that is the subject of
+                        a transfer request are object-specific, so the child elements of the
+                        &lt;transfer&gt; query command are specified using the EPP extension
+                        framework, i.e. an object-specific &lt;obj:transfer&gt; element </documentation>
+                </annotation>
+            </any>
+        </sequence>
+        <attribute name="op" type="epp:transferOpType"
+            use="required" />
+    </complexType>
+
+    <simpleType name="transferOpType">
+        <restriction base="token">
+            <enumeration value="approve">
+                <annotation>
+                    <documentation>The current sponsoring client MAY explicitly approve or reject
+                        the transfer request. The client can approve the request using a
+                        &lt;transfer&gt; command with the value of the "op" attribute set to
+                        "approve".</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="cancel">
+                <annotation>
+                    <documentation>Once a transfer has been requested, the same client can cancel
+                        the request using a &lt;transfer&gt; command with the value of the "op"
+                        attribute set to "cancel". A request to cancel the transfer MUST be sent to
+                        the server before the current sponsoring client either approves or rejects
+                        the transfer request and before the server automatically processes the
+                        request due to responding client inactivity.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="query">
+                <annotation>
+                    <documentation>Provides a query operation that allows a client to determine
+                        real-time status of pending and completed transfer requests.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="reject">
+                <annotation>
+                    <documentation>The current sponsoring client MAY explicitly approve or reject
+                        the transfer request. The client can approve the request using a
+                        &lt;transfer&gt; command with the value of the "op" attribute set to
+                        "approve". The client can reject the request using a &lt;transfer&gt;
+                        command with the value of the "op" attribute set to "reject".</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="request">
+                <annotation>
+                    <documentation>A client who wishes to assume sponsorship of a known object from
+                        another client uses the &lt;transfer&gt; command with the value of the "op"
+                        attribute set to "request. Once a transfer request has been received by the
+                        server, the server MUST notify the current sponsoring client of the
+                        requested transfer either by queuing a service message for retrieval via the
+                        &lt;poll&gt; command or by using an out-of-band mechanism to inform the
+                        client of the request.</documentation>
+                </annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>
+
+    <!--
+   All other object-centric commands.  EPP doesn't specify the syntax or
+   semantics of object-centric command elements.  The elements MUST be
+   described in detail in another schema specific to the object.
+   -->
+    <complexType name="readWriteType">
+        <sequence>
+            <any namespace="##other">
+                <annotation>
+                    <documentation>The elements needed to identify an object that is the subject of
+                        a readWriteType command (check, create, delete, info...) are
+                        object-specific, so the child elements of the &lt;transfer&gt; query command
+                        are specified using the EPP extension framework. It means the readWriteType
+                        command MUST contain an &lt;obj:command&gt; element that identifies the obj
+                        namespace (e.g. &lt;domain:create
+                        xmlsn:domain="urn:ietf:params:xml:ns:domain-1.0"&gt;).</documentation>
+                </annotation>
+            </any>
+        </sequence>
+    </complexType>
+
+    <complexType name="trIDType">
+        <sequence>
+            <element name="clTRID" type="epp:trIDStringType"
+                minOccurs="0" />
+            <element name="svTRID" type="epp:trIDStringType" />
+
+        </sequence>
+    </complexType>
+
+    <simpleType name="trIDStringType">
+        <restriction base="token">
+            <minLength value="3" />
+            <maxLength value="64" />
+        </restriction>
+    </simpleType>
+
+    <!--
+   Response types.
+
+    Note : the XSD does not hook the response <resData> to the relevant command
+    => i.e the XSD does not state that <domain:trnData> is the right response to the command
+    <domain:transfer>
+    But, the XSD defines the form of the <domain:trnData> response
+    Which means that :
+        - The EPP server MUST implement the link between a command and a response
+        - But the XML response must be formatted as per the RFC
+
+    That's why the XSD resData type is defined as a loose generic bucket : 
+    <element name="resData" type="epp:extAnyType" minOccurs="0"/>
+    
+    <complexType name="extAnyType">
+        <sequence>
+            <any namespace="##other" maxOccurs="unbounded" />
+        </sequence>
+    </complexType>
+
+   -->
+    <complexType name="responseType">
+        <sequence>
+            <element name="result" type="epp:resultType" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Document the success or failure of command execution. If the
+                        command was processed successfully, only one &lt;result&gt; element MUST be
+                        returned. If the command was not processed successfully, multiple
+                        &lt;result&gt; elements MAY be returned to document failure conditions.</documentation>
+                </annotation>
+            </element>
+            <element name="msgQ" type="epp:msgQType" minOccurs="0">
+                <annotation>
+                    <documentation>Describes messages queued for client retrieval. A &lt;msgQ&gt;
+                        element MUST NOT be present if there are no messages queued for client
+                        retrieval. A &lt;msgQ&gt; element MAY be present in responses to EPP
+                        commands other than the &lt;poll&gt; command if messages are queued for
+                        retrieval. A &lt;msgQ&gt; element MUST be present in responses to the EPP
+                        &lt;msgQ&gt; command if messages are queued for retrieval.</documentation>
+                </annotation>
+            </element>
+
+            <element name="resData" type="epp:extAnyType" minOccurs="0">
+                <annotation>
+                    <documentation>(response data) element that contains child elements specific to
+                        the command and associated object</documentation>
+                </annotation>
+            </element>
+            <element name="extension" type="epp:extAnyType" minOccurs="0">
+                <annotation>
+                    <documentation>Element that MAY be used for server-defined response extensions.</documentation>
+                </annotation>
+            </element>
+            <element name="trID" type="epp:trIDType">
+                <annotation>
+                    <documentation>(transaction identifier) element containing the transaction
+                        identifier assigned by the server to the command for which the response is
+                        being returned. Transaction identifiers provide command-response
+                        synchronization integrity. They SHOULD be logged, retained, and protected to
+                        ensure that both the client and the server have consistent temporal and
+                        state-management records.</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="resultType">
+        <sequence>
+            <element name="msg" type="epp:msgType">
+                <annotation>
+                    <documentation>Contains a human-readable description of the response code. The
+                        messages are not enforced (except the normalizedString constraint) because
+                        the RFC allows (and encourages) server implementations to provide
+                        descriptive, localized, or context-specific information that a static XSD
+                        enumeration could never predict. The result code is a "Contract," while the
+                        message is a "Commentary."</documentation>
+                </annotation>
+            </element>
+            <choice minOccurs="0" maxOccurs="unbounded">
+                <element name="value" type="epp:errValueType">
+                    <annotation>
+                        <documentation>Elements that identify a client-provided element (including
+                            XML tag and value) or other information that caused a server error
+                            condition</documentation>
+                    </annotation>
+                </element>
+                <element name="extValue" type="epp:extErrValueType">
+                    <annotation>
+                        <documentation>Elements that can be used to provide additional error
+                            diagnostic information</documentation>
+                    </annotation>
+                </element>
+            </choice>
+        </sequence>
+        <attribute name="code" type="epp:resultCodeType"
+            use="required" />
+    </complexType>
+
+    <complexType name="errValueType" mixed="true">
+        <sequence>
+            <any namespace="##any" processContents="skip" />
+        </sequence>
+        <anyAttribute namespace="##any" processContents="skip" />
+    </complexType>
+
+    <complexType name="extErrValueType">
+        <sequence>
+            <element name="value" type="epp:errValueType">
+                <annotation>
+                    <documentation>Elements that identify a client-provided element (including XML
+                        tag and value) or other information that caused a server error condition</documentation>
+                </annotation>
+            </element>
+            <element name="reason" type="epp:msgType">
+                <annotation>
+                    <documentation>Contains a human-readable message that describes the reason for
+                        the error</documentation>
+                </annotation>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="msgQType">
+        <sequence>
+            <annotation>
+                <documentation>The qDate and msg elements MUST be returned in response to a
+                    &lt;poll&gt; request command and MUST NOT be returned in response to any other
+                    command, including a &lt;poll&gt; acknowledgement</documentation>
+            </annotation>
+            <element name="qDate" type="dateTime" minOccurs="0">
+                <annotation>
+                    <documentation>Contains the date and time that the message was enqueued.</documentation>
+                </annotation>
+            </element>
+            <element name="msg" type="epp:mixedMsgType" minOccurs="0">
+                <annotation>
+                    <documentation>Contains a human-readable message</documentation>
+                </annotation>
+            </element>
+        </sequence>
+        <attribute name="count" type="unsignedLong" use="required">
+            <annotation>
+                <documentation>Describes the number of messages that exist in the queue.</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="id" type="eppcom:minTokenType" use="required">
+            <annotation>
+                <documentation>Used to uniquely identify the message at the head of the queue. </documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+
+    <complexType name="mixedMsgType" mixed="true">
+        <sequence>
+            <any processContents="skip" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="lang" type="language"
+            default="en" />
+    </complexType>
+
+    <!--
+   Human-readable text may be expressed in languages other than English.
+   -->
+    <complexType name="msgType">
+        <simpleContent>
+            <extension base="normalizedString">
+                <attribute name="lang" type="language"
+                    default="en" />
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <!--
+   EPP result codes.
+   -->
+    <simpleType name="resultCodeType">
+        <annotation>
+            <documentation>EPP uses four decimal digits to describe the success or failure of each
+                EPP command. Each of the digits of the reply have special significance. The first
+                digit denotes command success or failure. The second digit denotes the response
+                category, such as command syntax or security. The third and fourth digits provide
+                explicit response detail within each response category.</documentation>
+        </annotation>
+        <restriction base="unsignedShort">
+            <enumeration value="1000">
+                <annotation>
+                    <documentation>"Command completed successfully" | This is the usual response
+                        code for a successfully completed command that is not addressed by any other
+                        1xxx-series response code.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="1001">
+                <annotation>
+                    <documentation>"Command completed successfully; action pending" | This response
+                        code MUST be returned when responding to a command that requires offline
+                        activity before the requested action can be completed.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="1300">
+                <annotation>
+                    <documentation>"Command completed successfully; no messages" This response code
+                        MUST be returned when responding to a &lt;poll&gt; request command and the
+                        server message queue is empty.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="1301">
+                <annotation>
+                    <documentation>"Command completed successfully; ack to dequeue" This response
+                        code MUST be returned when responding to a &lt;poll&gt; request command and
+                        a message has been retrieved from the server message queue.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="1500">
+                <annotation>
+                    <documentation>"Command completed successfully; ending session" | This response
+                        code MUST be returned when responding to a successful &lt;logout&gt;
+                        command.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2000">
+                <annotation>
+                    <documentation>"Unknown command" | This response code MUST be returned when a
+                        server receives a command element that is not defined by EPP.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2001">
+                <annotation>
+                    <documentation>"Command syntax error" | This response code MUST be returned when
+                        a server receives an improperly formed command element.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2002">
+                <annotation>
+                    <documentation>"Command use error" | This response code MUST be returned when a
+                        server receives a properly formed command element but the command cannot be
+                        executed due to a sequencing or context error. For example, a &lt;logout&gt;
+                        command cannot be executed without having first completed a &lt;login&gt;
+                        command.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2003">
+                <annotation>
+                    <documentation>"Required parameter missing" | This response code MUST be
+                        returned when a server receives a command for which a required parameter
+                        value has not been provided.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2004">
+                <annotation>
+                    <documentation>"Parameter value range error" | This response code MUST be
+                        returned when a server receives a command parameter whose value is outside
+                        the range of values specified by the protocol. The error value SHOULD be
+                        returned via a &lt;value&gt; element in the EPP response.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2005">
+                <annotation>
+                    <documentation>"Parameter value syntax error" | This response code MUST be
+                        returned when a server receives a command containing a parameter whose value
+                        is improperly formed. The error value SHOULD be returned via a &lt;value&gt;
+                        element in the EPP response.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2100">
+                <annotation>
+                    <documentation>"Unimplemented protocol version" | This response code MUST be
+                        returned when a server receives a command element specifying a protocol
+                        version that is not implemented by the server.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2101">
+                <annotation>
+                    <documentation>"Unimplemented command" | This response code MUST be returned
+                        when a server receives a valid EPP command element that is not implemented
+                        by the server. For example, a &lt;transfer&gt; command can be unimplemented
+                        for certain object types.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2102">
+                <annotation>
+                    <documentation>"Unimplemented option" | This response code MUST be returned when
+                        a server receives a valid EPP command element that contains a protocol
+                        option that is not implemented by the server.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2103">
+                <annotation>
+                    <documentation>"Unimplemented extension" | This response code MUST be returned
+                        when a server receives a valid EPP command element that contains a protocol
+                        command extension that is not implemented by the server.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2104">
+                <annotation>
+                    <documentation>"Billing failure" | This response code MUST be returned when a
+                        server attempts to execute a billable operation and the command cannot be
+                        completed due to a client-billing failure.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2105">
+                <annotation>
+                    <documentation>"Object is not eligible for renewal" | This response code MUST be
+                        returned when a client attempts to &lt;renew&gt; an object that is not
+                        eligible for renewal in accordance with server policy.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2106">
+                <annotation>
+                    <documentation>"Object is not eligible for transfer" | This response code MUST
+                        be returned when a client attempts to &lt;transfer&gt; an object that is not
+                        eligible for transfer in accordance with server policy.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2200">
+                <annotation>
+                    <documentation>"Authentication error" | This response code MUST be returned when
+                        a server notes an error when validating client credentials.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2201">
+                <annotation>
+                    <documentation>"Authorization error" | This response code MUST be returned when
+                        a server notes a client-authorization error when executing a command. This
+                        error is used to note that a client lacks privileges to execute the
+                        requested command.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2202">
+                <annotation>
+                    <documentation>"Invalid authorization information" | This response code MUST be
+                        returned when a server receives invalid command authorization information
+                        when attempting to confirm authorization to execute a command. This error is
+                        used to note that a client has the privileges required to execute the
+                        requested command, but the authorization information provided by the client
+                        does not match the authorization information archived by the server.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2300">
+                <annotation>
+                    <documentation>"Object pending transfer" | This response code MUST be returned
+                        when a server receives a command to transfer of an object that is pending
+                        transfer due to an earlier transfer request.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2301">
+                <annotation>
+                    <documentation>"Object not pending transfer" | This response code MUST be
+                        returned when a server receives a command to confirm, reject, or cancel the
+                        transfer of an object when no command has been made to transfer the object.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2302">
+                <annotation>
+                    <documentation>"Object exists" | This response code MUST be returned when a
+                        server receives a command to create an object that already exists in the
+                        repository.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2303">
+                <annotation>
+                    <documentation>"Object does not exist" | This response code MUST be returned
+                        when a server receives a command to query or transform an object that does
+                        not exist in the repository.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2304">
+                <annotation>
+                    <documentation>"Object status prohibits operation" | This response code MUST be
+                        returned when a server receives a command to transform an object that cannot
+                        be completed due to server policy or business practices. For example, a
+                        server can disallow &lt;transfer&gt; commands under terms and conditions
+                        that are matters of local policy, or the server might have received a
+                        &lt;delete&gt; command for an object whose status prohibits deletion.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2305">
+                <annotation>
+                    <documentation>"Object association prohibits operation" | This response code
+                        MUST be returned when a server receives a command to transform an object
+                        that cannot be completed due to dependencies on other objects that are
+                        associated with the target object. For example, a server can disallow
+                        &lt;delete&gt; commands while an object has active associations with other
+                        objects.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2306">
+                <annotation>
+                    <documentation>"Parameter value policy error" | This response code MUST be
+                        returned when a server receives a command containing a parameter value that
+                        is syntactically valid but semantically invalid due to local policy. For
+                        example, the server can support a subset of a range of valid protocol
+                        parameter values. The error value SHOULD be returned via a &lt;value&gt;
+                        element in the EPP response.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2307">
+                <annotation>
+                    <documentation>"Unimplemented object service" | This response code MUST be
+                        returned when a server receives a command to operate on an object service
+                        that is not supported by the server.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2308">
+                <annotation>
+                    <documentation>"Data management policy violation" | This response code MUST be
+                        returned when a server receives a command whose execution results in a
+                        violation of server data management policies. For example, removing all
+                        attribute values or object associations from an object might be a violation
+                        of a server's data management policies.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2400">
+                <annotation>
+                    <documentation>"Command failed" | This response code MUST be returned when a
+                        server is unable to execute a command due to an internal server error that
+                        is not related to the protocol. The failure can be transient. The server
+                        MUST keep any ongoing session active.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2500">
+                <annotation>
+                    <documentation>"Command failed; server closing connection" | This response code
+                        MUST be returned when a server receives a command that cannot be completed
+                        due to an internal server error that is not related to the protocol. The
+                        failure is not transient and will cause other commands to fail as well. The
+                        server MUST end the active session and close the existing connection. </documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2501">
+                <annotation>
+                    <documentation>"Authentication error; server closing connection" | This response
+                        code MUST be returned when a server notes an error when validating client
+                        credentials and a server-defined limit on the number of allowable failures
+                        has been exceeded. The server MUST close the existing connection.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="2502">
+                <annotation>
+                    <documentation>"Session limit exceeded; server closing connection" | This
+                        response code MUST be returned when a server receives a &lt;login&gt;
+                        command and the command cannot be completed because the client has exceeded
+                        a system-defined limit on the number of sessions that the client can
+                        establish. It might be possible to establish a session by ending existing
+                        unused sessions and closing inactive connections.</documentation>
+                </annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>
+
+    <!--
+   End of schema.
+   -->
+</schema>

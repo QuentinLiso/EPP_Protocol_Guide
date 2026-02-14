@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- 
+#######################################################
+Host name format
+#######################################################
+-->
+
+<!-- Example host-object name server elements for domain example.com: -->
+
+<domain:ns>
+  <domain:hostObj>ns1.example.net</domain:hostObj>
+  <domain:hostObj>ns2.example.net</domain:hostObj>
+</domain:ns>
+
+
+<!-- Example host-attribute name server elements for domain example.com: -->
+
+<domain:ns>
+  <domain:hostAttr>
+    <domain:hostName>ns1.example.net</domain:hostName>
+    <domain:hostAddr
+      ip="v4">192.0.2.2</domain:hostAddr>
+    <domain:hostAddr
+      ip="v6">1080:0:0:0:8:800:200417A</domain:hostAddr>
+  </domain:hostAttr>
+  <domain:hostAttr>
+    <domain:hostName>ns2.example.net</domain:hostName>
+  </domain:hostAttr>
+</domain:ns>
+
+
+<!-- 
+#######################################################
+Query Commands
+#######################################################
+-->
+
+<!-- Example <check> command: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <check>
+      <domain:check
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:name>example.net</domain:name>
+        <domain:name>example.org</domain:name>
+      </domain:check>
+    </check>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+<!-- Example <check> response: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1000">
+      <msg>Command completed successfully</msg>
+    </result>
+    <resData>
+      <domain:chkData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:cd>
+          <domain:name avail="1">example.com</domain:name>
+        </domain:cd>
+        <domain:cd>
+          <domain:name avail="0">example.net</domain:name>
+          <domain:reason>In use</domain:reason>
+        </domain:cd>
+        <domain:cd>
+          <domain:name avail="1">example.org</domain:name>
+        </domain:cd>
+      </domain:chkData>
+    </resData>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54322-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- Example <info> command without authorization information: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <info>
+      <domain:info
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name hosts="all">example.com</domain:name>
+      </domain:info>
+    </info>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+
+<!-- Example <info> command with authorization information: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <info>
+      <domain:info
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name hosts="all">example.com</domain:name>
+        <domain:authInfo>
+          <domain:pw>2fooBAR</domain:pw>
+        </domain:authInfo>
+      </domain:info>
+    </info>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+
+<!-- Example <info> response for an authorized client: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1000">
+      <msg>Command completed successfully</msg>
+    </result>
+    <resData>
+      <domain:infData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:roid>EXAMPLE1-REP</domain:roid>
+        <domain:status s="ok" />
+        <domain:registrant>jd1234</domain:registrant>
+        <domain:contact type="admin">sh8013</domain:contact>
+        <domain:contact type="tech">sh8013</domain:contact>
+        <domain:ns>
+          <domain:hostObj>ns1.example.com</domain:hostObj>
+          <domain:hostObj>ns1.example.net</domain:hostObj>
+        </domain:ns>
+        <domain:host>ns1.example.com</domain:host>
+        <domain:host>ns2.example.com</domain:host>
+        <domain:clID>ClientX</domain:clID>
+        <domain:crID>ClientY</domain:crID>
+        <domain:crDate>1999-04-03T22:00:00.0Z</domain:crDate>
+        <domain:upID>ClientX</domain:upID>
+        <domain:upDate>1999-12-03T09:00:00.0Z</domain:upDate>
+        <domain:exDate>2005-04-03T22:00:00.0Z</domain:exDate>
+        <domain:trDate>2000-04-08T09:00:00.0Z</domain:trDate>
+        <domain:authInfo>
+          <domain:pw>2fooBAR</domain:pw>
+        </domain:authInfo>
+      </domain:infData>
+    </resData>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54322-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- Example <info> response for an unauthorized client: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1000">
+      <msg>Command completed successfully</msg>
+    </result>
+    <resData>
+      <domain:infData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:roid>EXAMPLE1-REP</domain:roid>
+        <domain:clID>ClientX</domain:clID>
+      </domain:infData>
+    </resData>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54322-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- Example <transfer> query command: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <transfer op="query">
+      <domain:transfer
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:authInfo>
+          <domain:pw roid="JD1234-REP">2fooBAR</domain:pw>
+        </domain:authInfo>
+      </domain:transfer>
+    </transfer>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+
+<!-- Example <transfer> query response: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1000">
+      <msg>Command completed successfully</msg>
+    </result>
+    <resData>
+      <domain:trnData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:trStatus>pending</domain:trStatus>
+        <domain:reID>ClientX</domain:reID>
+        <domain:reDate>2000-06-06T22:00:00.0Z</domain:reDate>
+        <domain:acID>ClientY</domain:acID>
+        <domain:acDate>2000-06-11T22:00:00.0Z</domain:acDate>
+        <domain:exDate>2002-09-08T22:00:00.0Z</domain:exDate>
+      </domain:trnData>
+    </resData>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54322-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+<!-- 
+#######################################################
+Transform Commands
+#######################################################
+-->
+
+<!-- Example <create> command: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <create>
+      <domain:create
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:period unit="y">2</domain:period>
+        <domain:ns>
+          <domain:hostObj>ns1.example.net</domain:hostObj>
+          <domain:hostObj>ns2.example.net</domain:hostObj>
+        </domain:ns>
+        <domain:registrant>jd1234</domain:registrant>
+        <domain:contact type="admin">sh8013</domain:contact>
+        <domain:contact type="tech">sh8013</domain:contact>
+        <domain:authInfo>
+          <domain:pw>2fooBAR</domain:pw>
+        </domain:authInfo>
+      </domain:create>
+    </create>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+
+<!-- Example <create> response: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1000">
+      <msg>Command completed successfully</msg>
+    </result>
+    <resData>
+      <domain:creData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:crDate>1999-04-03T22:00:00.0Z</domain:crDate>
+        <domain:exDate>2001-04-03T22:00:00.0Z</domain:exDate>
+      </domain:creData>
+    </resData>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54321-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- Example <delete> command: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <delete>
+      <domain:delete
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+      </domain:delete>
+    </delete>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+
+<!-- Example <delete> response: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1000">
+      <msg>Command completed successfully</msg>
+    </result>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54321-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- Example <renew> command: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <renew>
+      <domain:renew
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:curExpDate>2000-04-03</domain:curExpDate>
+        <domain:period unit="y">5</domain:period>
+      </domain:renew>
+    </renew>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+
+<!-- Example <renew> response: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1000">
+      <msg>Command completed successfully</msg>
+    </result>
+    <resData>
+      <domain:renData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:exDate>2005-04-03T22:00:00.0Z</domain:exDate>
+      </domain:renData>
+    </resData>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54322-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- Example <transfer> request command: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <transfer op="request">
+      <domain:transfer
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:period unit="y">1</domain:period>
+        <domain:authInfo>
+          <domain:pw roid="JD1234-REP">2fooBAR</domain:pw>
+        </domain:authInfo>
+      </domain:transfer>
+    </transfer>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+
+<!-- Example <transfer> response: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1001">
+      <msg>Command completed successfully; action pending</msg>
+    </result>
+    <resData>
+      <domain:trnData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:trStatus>pending</domain:trStatus>
+        <domain:reID>ClientX</domain:reID>
+        <domain:reDate>2000-06-08T22:00:00.0Z</domain:reDate>
+        <domain:acID>ClientY</domain:acID>
+        <domain:acDate>2000-06-13T22:00:00.0Z</domain:acDate>
+        <domain:exDate>2002-09-08T22:00:00.0Z</domain:exDate>
+      </domain:trnData>
+    </resData>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54322-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- Example <update> command: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <command>
+    <update>
+      <domain:update
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:add>
+          <domain:ns>
+            <domain:hostObj>ns2.example.com</domain:hostObj>
+          </domain:ns>
+          <domain:contact type="tech">mak21</domain:contact>
+          <domain:status s="clientHold"
+            lang="en">Payment overdue.</domain:status>
+        </domain:add>
+        <domain:rem>
+          <domain:ns>
+            <domain:hostObj>ns1.example.com</domain:hostObj>
+          </domain:ns>
+          <domain:contact type="tech">sh8013</domain:contact>
+          <domain:status s="clientUpdateProhibited" />
+        </domain:rem>
+        <domain:chg>
+          <domain:registrant>sh8013</domain:registrant>
+          <domain:authInfo>
+            <domain:pw>2BARfoo</domain:pw>
+          </domain:authInfo>
+        </domain:chg>
+      </domain:update>
+    </update>
+    <clTRID>ABC-12345</clTRID>
+  </command>
+</epp>
+
+
+<!-- Example <update> response: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1000">
+      <msg>Command completed successfully</msg>
+    </result>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54321-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- 
+#######################################################
+Offline Review of a Request
+#######################################################
+-->
+
+
+<!-- Examples describing a <create> command that requires offline review
+   are included here.  Note the result code and message returned in
+   response to the <create> command. -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1001">
+      <msg>Command completed successfully; action pending</msg>
+    </result>
+    <resData>
+      <domain:creData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name>example.com</domain:name>
+        <domain:crDate>1999-04-03T22:00:00.0Z</domain:crDate>
+        <domain:exDate>2001-04-03T22:00:00.0Z</domain:exDate>
+      </domain:creData>
+    </resData>
+    <trID>
+      <clTRID>ABC-12345</clTRID>
+      <svTRID>54321-XYZ</svTRID>
+    </trID>
+  </response>
+</epp>
+
+
+<!-- Example "review completed" service message: -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+  <response>
+    <result code="1301">
+      <msg>Command completed successfully; ack to dequeue</msg>
+    </result>
+    <msgQ count="5" id="12345">
+      <qDate>1999-04-04T22:01:00.0Z</qDate>
+      <msg>Pending action completed successfully.</msg>
+    </msgQ>
+    <resData>
+      <domain:panData
+        xmlns:domain="urn:ietf:params:xml:ns:domain-1.0">
+        <domain:name paResult="1">example.com</domain:name>
+        <domain:paTRID>
+          <clTRID>ABC-12345</clTRID>
+          <svTRID>54321-XYZ</svTRID>
+        </domain:paTRID>
+        <domain:paDate>1999-04-04T22:00:00.0Z</domain:paDate>
+      </domain:panData>
+    </resData>
+    <trID>
+      <clTRID>BCD-23456</clTRID>
+      <svTRID>65432-WXY</svTRID>
+    </trID>
+  </response>
+</epp>
