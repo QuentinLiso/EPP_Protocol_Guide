@@ -47,7 +47,6 @@ Feel free to read the RFCs if you need more detailed explanations though, it's a
       - [Step 4. The TLS Handshake](#step-4-the-tls-handshake)
 
 
----
 
 ## 1. Basics
 
@@ -122,7 +121,6 @@ Example of response sent back by the registry to the registrar for the above req
 </epp>
 ```
 
----
 
 ## 2. What EPP can do ?
 
@@ -141,7 +139,7 @@ Since EPP is an XML-based protocol, each request/response uses specific tags and
 
 (Note : A basic understanding of the XML syntax is helpful. We'll do our best to explain the XML-specific elements used by EPP though)
 
----
+
 
 ### 2.1. All EPP request have this first-level wrapper :
 
@@ -168,7 +166,7 @@ Line 2 : identifies that the EPP protocol is used with the <epp></epp> tag. xmln
 
 Again don't worry if it's not clear yet : section 3.1 below is all about XSD and namespaces
 
----
+
 
 ### 2.2. Inside this first-level wrapper, we use a set of predefined second-level tags depending on the EPP service we want to use :
 
@@ -246,7 +244,6 @@ Below are the sample XML blocks using these tags. Don't worry about the blank `<
 </epp>
 ```
 
----
 
 ## 3. EPP Services Deep Dive
 
@@ -269,7 +266,7 @@ To handle this as clearly as possible, we will :
 - Rely upon the XSD sample files provided by the RFCs for comprehensiveness of allowed XML elements.
 - Provide the EPP sample messages from the RFCs for concrete enforcement of the previous points.
 
----
+
 
 ### 3.1. XSD Sample Files
 
@@ -432,7 +429,7 @@ And finally, to add the remaining nested tags required for domain:check, we refe
 
 We will not keep going because this can be long, but you get the point : **follow the type definitions throught the XSD file, and refer to the XSD documentation if needed.**
 
----
+
 
 ### 3.2 EPP sample messages
 
@@ -447,7 +444,7 @@ The EPP sample messages from the RFCs are provided in the **epp-samples** folder
 |Contacts (RFC 5733) | [Markdown](./epp-samples/md/samples-rfc5733-epp.md) | [XML](./epp-samples/xml/samples-rfc5733-epp.xml)
 |Redemption Grade Period for Domains (RFC 3915) | [Markdown](./epp-samples/md/samples-rfc3915-epp.md) | [XML](./epp-samples/xml/samples-rfc3915-epp.xml)
 
----
+
 
 ## 4. EPP Networking Implementation
 
@@ -457,7 +454,7 @@ The [RFC 5734](https://datatracker.ietf.org/doc/html/rfc5734#autoid-3) defines h
 - Message Exchange Pattern
 - Security Considerations 
 
----
+
 
 ### 4.1. Connection Lifecycle (State Machine)
 
@@ -480,7 +477,7 @@ The protocol follows a very strict handshake and session sequence :
 - Timeouts: The EPP server should implement a timeout. If a client connects but doesn't send a command within a specific window, the server will close the connection.
 - Idempotency: EPP commands are generally idempotent. If the connection drops after you send a command but before you get the response, you should be able to retry (though you'd typically check the object state first).
 
----
+
 
 ### 4.2. Data Unit Format (Data Framing)
 
@@ -492,7 +489,7 @@ Steps:
 3. **Read Payload**: Read XML_Length bytes to get the full XML instance.
 4. **Parsing**: Pass the resulting buffer to the XML message parser.
 
----
+
 
 ### 4.3. Message Exchange Pattern
 
@@ -500,7 +497,7 @@ Steps:
 - Pipelining: A client may send multiple commands before receiving a response. However, the server must process them independently and return responses in the same order they were received.
 - One-to-One Mapping: Each EPP data unit must contain exactly one EPP message.
 
----
+
 
 ### 4.4. Security Considerations
 
