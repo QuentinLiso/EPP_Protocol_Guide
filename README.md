@@ -26,8 +26,8 @@ Feel free to read the RFCs if you need more detailed explanations though, it's a
   - [2.2. Inside this first-level wrapper, we use a set of predefined second-level tags depending on the EPP service we want to use :](#22-inside-this-first-level-wrapper-we-use-a-set-of-predefined-second-level-tags-depending-on-the-epp-service-we-want-to-use-)
 - [3. EPP Services Deep Dive](#3-epp-services-deep-dive)
   - [3.1. XSD Sample Files](#31-xsd-sample-files)
-        - [Step 1 :](#step-1-)
-        - [Step 2 :](#step-2-)
+      - [Step 1 :](#step-1-)
+      - [Step 2 :](#step-2-)
         - [Step 3 :](#step-3-)
       - [Step 4 :](#step-4-)
       - [Step 5 :](#step-5-)
@@ -297,7 +297,7 @@ A good quick guide about XSD files is available here : [XSD Guide](https://www.w
 
 To stay in the context of EPP, we'll just follow a simple example from the Base EPP XSD.
 
-###### Step 1 :
+##### Step 1 :
 
 ```xml
 <schema targetNamespace="urn:ietf:params:xml:ns:epp-1.0"
@@ -314,7 +314,7 @@ This means that :
 - Each type prefixed with "epp:" in the XSD file belongs to this namespace and is defined elsewhere in this XSD file
 - Each type prefixed with "eppcom:" belongs to the namespace "urn:ietf:params:xml:ns:eppcom-1.0" defined in the file 0_eppcom.xsd
 
-###### Step 2 :
+##### Step 2 :
 
 ```xml
 <!--
